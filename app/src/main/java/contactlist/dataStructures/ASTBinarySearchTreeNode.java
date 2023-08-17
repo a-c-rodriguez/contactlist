@@ -3,7 +3,8 @@ package contactlist.dataStructures;
 import contactlist.App;
 import contactlist.dataStructures.ASTBinarySearchTree.TreeState;
 
-public class ASTBinarySearchTreeNode<T extends Comparable<T>>{
+public class ASTBinarySearchTreeNode<T extends Comparable<T>> 
+    implements ITreeNode<T>{
 
     public T data;
     public ASTBinarySearchTreeNode<T> leftNode;
@@ -16,6 +17,19 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>{
         this.data = value;
         this.parentNode = parentNode;
         this.tree = tree;
+    }
+
+
+    public T getData() {
+        return this.data;
+    }
+
+    public ITreeNode<T> getRightNode() {
+        return this.rightNode;
+    }
+
+    public ITreeNode<T> getLeftNode() {
+        return this.leftNode;
     }
 
     protected void setRightNode(ASTBinarySearchTreeNode<T> newRight) {
@@ -144,7 +158,6 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>{
     //     / \
     //    a   c
     //
-
         ASTBinarySearchTreeNode<T> newRoot = this.leftNode;
         
         //replace current root with new root

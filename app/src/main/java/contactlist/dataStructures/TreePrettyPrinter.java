@@ -4,32 +4,32 @@ public class TreePrettyPrinter<T extends Comparable<T>> {
 
     private static final String POINTER_RIGHT = "|__";
     private static final String POINTER_LEFT_BOTH = "|==";
+    private static final String EMPTY_STRING = "";
 
-    public String traversePreOrder(ASTBinarySearchTreeNode<T> root) {
-
+    public String traversePreOrder(ITreeNode<T> root) {
         if (root == null) {
-            return "";
+            return EMPTY_STRING;
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(root.data);
+        sb.append(root.getData());
 
         String pointerRight = POINTER_RIGHT;
-        String pointerLeft = (root.rightNode != null) ? POINTER_LEFT_BOTH : POINTER_RIGHT;
+        String pointerLeft = (root.getRightNode() != null) ? POINTER_LEFT_BOTH : POINTER_RIGHT;
 
-        traverseNodes(sb, "", pointerLeft, root.leftNode, root.rightNode != null);
-        traverseNodes(sb, "", pointerRight, root.rightNode, false);
+        traverseNodes(sb, EMPTY_STRING, pointerLeft, root.getLeftNode(), root.getRightNode() != null);
+        traverseNodes(sb, EMPTY_STRING, pointerRight, root.getRightNode(), false);
 
         return sb.toString();
     }
 
-    public void traverseNodes(StringBuilder sb, String padding, String pointer, ASTBinarySearchTreeNode<T> node,
-            boolean hasRightSibling) {
+    public void traverseNodes(StringBuilder sb, String padding, String pointer, 
+            ITreeNode<T> node, boolean hasRightSibling) {
         if (node != null) {
             sb.append("\n");
             sb.append(padding);
             sb.append(pointer);
-            sb.append(node.data);
+            sb.append(node.getData());
 
             StringBuilder paddingBuilder = new StringBuilder(padding);
             if (hasRightSibling) {
@@ -40,10 +40,10 @@ public class TreePrettyPrinter<T extends Comparable<T>> {
 
             String paddingForBoth = paddingBuilder.toString();
             String pointerRight = POINTER_RIGHT;
-            String pointerLeft = (node.rightNode != null) ? POINTER_LEFT_BOTH : POINTER_RIGHT;
+            String pointerLeft = (node.getRightNode() != null) ? POINTER_LEFT_BOTH : POINTER_RIGHT;
 
-            traverseNodes(sb, paddingForBoth, pointerLeft, node.leftNode, node.rightNode != null);
-            traverseNodes(sb, paddingForBoth, pointerRight, node.rightNode, false);
+            traverseNodes(sb, paddingForBoth, pointerLeft, node.getLeftNode(), node.getRightNode() != null);
+            traverseNodes(sb, paddingForBoth, pointerRight, node.getRightNode(), false);
         }
     }
 }

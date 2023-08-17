@@ -600,6 +600,10 @@ public class BinarySearchTree<T extends Comparable<T>> implements Collection<T> 
     }
 
     public String print() {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        sb.append(new TreePrettyPrinter<T>().traversePreOrder(this.rootNode));
+        sb.append("\n\nLeft Height: "+this.rootNode.getLeftHeight());
+        sb.append("\tRight Height: "+this.rootNode.getRightHeight());
+        return sb.toString();
     }
 }

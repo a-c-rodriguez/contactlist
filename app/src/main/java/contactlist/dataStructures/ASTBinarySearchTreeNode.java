@@ -1,5 +1,7 @@
 package contactlist.dataStructures;
 
+import java.text.MessageFormat;
+
 import contactlist.App;
 import contactlist.dataStructures.ASTBinarySearchTree.TreeState;
 
@@ -36,9 +38,9 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>
         this.rightNode = newRight;
         if(this.rightNode != null) {
             this.rightNode.parentNode = this;
-            App.print(this.getClass().getTypeName() + "setRightNode Result (rightNode, parent) ->(" + rightNode.data + ", " + rightNode.parentNode.data +")");  
+            //App.print(this.getClass().getTypeName() + "setRightNode Result (rightNode, parent) ->(" + rightNode.data + ", " + rightNode.parentNode.data +")");  
         } else {
-            App.print("setRightNode is null!");
+            //App.print("setRightNode is null!");
         }
     }
 
@@ -46,9 +48,9 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>
         this.leftNode = newLeft;
         if(this.leftNode != null) {
             this.leftNode.parentNode = this;
-            App.print(this.getClass().getTypeName() + "setLeftNode Result (leftNode, parent) ->(" + leftNode.data + ", " + leftNode.parentNode.data +")");  
+            //App.print(this.getClass().getTypeName() + "setLeftNode Result (leftNode, parent) ->(" + leftNode.data + ", " + leftNode.parentNode.data +")");  
         } else {
-            App.print("setLeftNode is null!");
+            //App.print("setLeftNode is null!");
         }
     }
 
@@ -181,8 +183,8 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>
 
     private void replaceRoot(ASTBinarySearchTreeNode<T> newRoot) {
         if(this.parentNode != null) {
-            App.print(this.getClass().getTypeName() +  "this.equals(this.parentNode.leftNode)?" + this.equals(this.parentNode.leftNode));
-            App.print(this.getClass().getTypeName() +  "this.equals(this.parentNode.rightNode)?" + this.equals(this.parentNode.rightNode));
+            //App.print(this.getClass().getTypeName() +  "this.equals(this.parentNode.leftNode)?" + this.equals(this.parentNode.leftNode));
+            //App.print(this.getClass().getTypeName() +  "this.equals(this.parentNode.rightNode)?" + this.equals(this.parentNode.rightNode));
             if(this.equals(this.parentNode.leftNode)) {
                 this.parentNode.setLeftNode(newRoot);
             } else if(this.equals(this.parentNode.rightNode)) {
@@ -197,9 +199,16 @@ public class ASTBinarySearchTreeNode<T extends Comparable<T>>
         this.parentNode = newRoot;
     }
 
-    private int maxChildHeight(ASTBinarySearchTreeNode<T> child) {
+    private int maxChildHeight(ITreeNode<T> child) {
         if(null != child) {
-          return 1 + Math.max(maxChildHeight(child.leftNode), maxChildHeight(child.rightNode));
+            //App.print(MessageFormat.format("maxChildHeight node(hasLeft, hasRight):{0}({1},{2})",child.getData(),
+                //null != child.getLeftNode(), null != child.getRightNode()));
+        } else {
+            //App.print("child is null!!");
+        }
+
+        if(null != child) {
+          return 1 + Math.max(maxChildHeight(child.getLeftNode()), maxChildHeight(child.getRightNode()));
         }
 
         return 0;

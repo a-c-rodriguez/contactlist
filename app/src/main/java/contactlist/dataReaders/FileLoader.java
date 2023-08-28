@@ -41,8 +41,10 @@ public class FileLoader {
                     }
                     Contact loadContact = Contact.makeContact(id, args);
                     Contact c = contactStore.add(loadContact);
-                    App.print("loaded " + c.toStringWithId());
-                    this.loadCount++;
+                    if(null != c) {
+                        App.print("loaded " + c.toStringWithId());
+                        this.loadCount++;
+                    }
                 });
         } catch (Exception e) {
             App.print(e.getMessage());

@@ -2,15 +2,17 @@ package contactlist.dataStructures;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import contactlist.App;
 
+
+import contactlist.App;
 /**
- * ASTBinarySearchTree
+ * ArrayASTBinarySearchTree
  */
-public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<T> {
+public class ArrayASTBinarySearchTree<T extends Comparable<T>> implements Collection<T> {
 
     public enum TreeState {
         RightHeavy,
@@ -19,37 +21,69 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
     }
 
     private int count = 0;
-    private ASTBinarySearchTreeNode<T> rootNode;
+    private List<T> nodes = new ArrayList<>(20);
 
-    public void setRoot(ASTBinarySearchTreeNode<T> newRoot) {
-        this.rootNode = newRoot;
+    public T getNode(int index) {
+        T node = null;
+        if(index < this.nodes.size()) {
+            node = this.nodes.get(index);
+        } 
+        return node;
+    }
+
+
+    public void setNode(int index, T value){
+        if(index > this.nodes.size()-1) {
+            int newSize = (int)Math.abs((this.nodes.size()*2)+1);
+            App.print(MessageFormat.format("Old size {0} -> New Size {1}", this.nodes.size(), newSize));
+            for(int i=0; i < newSize; i++) {
+                this.nodes.add(null);
+            }
+        }
+
+        if(index < this.nodes.size()) {
+            T oldVal = this.nodes.set(index, value);
+            App.print(MessageFormat.format("Replaced old val {0} at index {1} with new val {2}", oldVal, index, value));
+        } else {
+            App.print(MessageFormat.format("this.nodes size:{0} > index:{1}", this.nodes.size(), index));
+        }
+
+    }
+
+    public void setRoot(T newRoot) {
+        setNode(0, newRoot);
     }
 
     public void addNode(T value) {
-        if (null == this.rootNode) {
-            this.rootNode = new ASTBinarySearchTreeNode<T>(value, null, this);
+        if (this.size() == 0) {
+            setRoot(value);
         } else {
-            insertNode(this.rootNode, value);
+            insertNode(0, value);
         }
         this.count++;
     }
 
-    private void insertNode(ASTBinarySearchTreeNode<T> node, T value) {
-        if (value.compareTo(node.data) < 0) {
-            if (null == node.leftNode) {
-                node.setLeftNode(new ASTBinarySearchTreeNode<T>(value, node, this));
+    private void insertNode(int nodeIndex, T value) {
+        if(null == value) return;
+
+        T node = this.getNode(nodeIndex);
+        if (value.compareTo(node) < 0) {
+            int leftNodeIndex = (2*nodeIndex)+1;
+            if (null == this.getNode(leftNodeIndex)) {
+                setNode(leftNodeIndex, value);
             } else {
-                insertNode(node.leftNode, value);
+                insertNode(leftNodeIndex, value);
             }
         } else {
-            if (null == node.rightNode) {
-                node.setRightNode(new ASTBinarySearchTreeNode<T>(value, node, this));
+            int rightNodeIndex = (2*nodeIndex)+2;
+            if (null == this.getNode(rightNodeIndex)) {
+                setNode(rightNodeIndex, value);
             } else {
-                insertNode(node.rightNode, value);
+                insertNode(rightNodeIndex, value);
             }
         }
 
-        node.balance();
+        //node.balance();
     }
 
     public void deleteNode(Object o) {
@@ -62,81 +96,92 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
     }
 
     public void deleteNode(T value) {
-        removeNode(new ASTBinarySearchTreeNode<>(value, null, this));
-    }
-
-    private void removeNode(ASTBinarySearchTreeNode<T> node) {
-        ASTBinarySearchTreeNode<T> foundNode = search(node.data);
+        Result<T> foundNode = search(value);
         if (foundNode == null) {
-            App.print("No match foundNode for " + node.data.toString());
+            contactlist.App.print("No match foundNode for " + value.toString());
             return;
         } else {
-            ASTBinarySearchTreeNode<T> parentNode = foundNode.parentNode;
-            ASTBinarySearchTreeNode<T> treeToBalance = parentNode;
+
+            int parentNodeIndex = (foundNode.index == 0) ? -1 : (foundNode.index-1)/2;
+            T parentNode = this.getNode(parentNodeIndex);
+            int indexToBalance = parentNodeIndex;
+
+            int leftNodeIndex = (2*foundNode.index)+1;
+            int rightNodeIndex = (2*foundNode.index)+2;
+
             // zero child - delete
-            if (null == foundNode.leftNode && null == foundNode.rightNode) {
-                if (parentNode != null) {
-                    if (null != parentNode.leftNode && foundNode.data.compareTo(parentNode.leftNode.data) == 0) {
-                        parentNode.leftNode = null;
-                    } else if (null != parentNode.rightNode && foundNode.data.compareTo(parentNode.rightNode.data) == 0) {
-                        parentNode.rightNode = null;
+            if (null == this.getNode(leftNodeIndex) && null == this.getNode(rightNodeIndex)) {
+                if (null != parentNode) {
+                    int parentLeftNodeIndex = (2*parentNodeIndex)+1;
+                    int parentRightNodeIndex = (2*parentNodeIndex)+2;
+                    if (foundNode.value.compareTo(this.getNode(parentLeftNodeIndex)) == 0) {
+                        setNode(parentLeftNodeIndex, null);
+                    } else if (foundNode.value.compareTo(this.getNode(parentRightNodeIndex)) == 0) {
+                        setNode(parentRightNodeIndex, null);
                     }
                 } else {
-                    //delete root
                     this.setRoot(null);
                 }
                 foundNode = null;
             // two children - goto right child and promote left most child
-            } else if (null != foundNode.leftNode && null != foundNode.rightNode) {
-                ASTBinarySearchTreeNode<T> foundNodeLeft = foundNode.leftNode;
-                ASTBinarySearchTreeNode<T> foundNodeRight = foundNode.rightNode;
-                ASTBinarySearchTreeNode<T> leftMostChild = foundNodeRight.leftNode;
-                ASTBinarySearchTreeNode<T> parentLeftMostChild = foundNodeRight;
-                while (null != leftMostChild && null != leftMostChild.leftNode) {
-                    parentLeftMostChild = leftMostChild;
-                    leftMostChild = parentLeftMostChild.leftNode;
-                }
-                ASTBinarySearchTreeNode<T> temp;
-                if(null != leftMostChild){
-                    temp = leftMostChild;
-                    parentLeftMostChild.setLeftNode(temp.rightNode);
+            } else if (null != this.getNode(leftNodeIndex) && null != this.getNode(rightNodeIndex))  {
+                T foundNodeLeft = this.getNode(leftNodeIndex);
+                T foundNodeRight = this.getNode(rightNodeIndex);
+                int leftMostChildIndex = (2*rightNodeIndex)+1;
+				Result<T> parentLeftMostChild = new Result<T>(rightNodeIndex, foundNodeRight);
+                Result<T> leftMostChild = new Result<T>(rightNodeIndex, foundNodeRight);
+                while (leftMostChildIndex < this.nodes.size()-1 && null != this.getNode(leftMostChildIndex)) {
+        			parentLeftMostChild = leftMostChild;
+					leftMostChild = new Result<T>(leftMostChildIndex, this.getNode(leftMostChildIndex));
+                    leftMostChildIndex = (2*leftMostChildIndex)+1;
+                } 
+
+                T temp;
+               if(null != leftMostChild){
+                    temp = leftMostChild.value;
+                    //parentLeftMostChild.setLeftNode(temp.rightNode);
                 } else { 
                     temp = foundNodeRight;
                 }
-
                 if (parentNode != null) {
-                    if (foundNode.data.compareTo(parentNode.leftNode.data) == 0) {
-                        parentNode.setLeftNode(temp);
-                    } else if (foundNode.data.compareTo(parentNode.rightNode.data) == 0) {
-                        parentNode.setRightNode(temp);
+                    int parentLeftNodeIndex = (2*parentNodeIndex)+1;
+                    int parentRightNodeIndex = (2*parentNodeIndex)+2;
+                    if (foundNode.value.compareTo(this.getNode(parentLeftNodeIndex)) == 0) {
+                        setNode(parentLeftNodeIndex, temp);
+                    } else if (foundNode.value.compareTo(this.getNode(parentRightNodeIndex)) == 0) {
+                        setNode(parentRightNodeIndex, temp);
                     }
                 } else {
-                    temp.parentNode = null;
+                    //temp.parentNode = null;
                     this.setRoot(temp);
                 }
-
-                foundNode = temp;
-                foundNode.setLeftNode(foundNodeLeft);
-                // only set right node if there was a leftmost child
+                
+                //not necessary since previous code set this value
+                //setNode(foundNode.index, temp);
+                setNode(leftNodeIndex, foundNodeLeft);
+                //foundNode.setLeftNode(foundNodeLeft);
+                //foundNode.setRightNode(foundNodeRight);
                 if(null != leftMostChild) {
-                    foundNode.setRightNode(foundNodeRight);
+                    //foundNode.setRightNode(foundNodeRight);
                 }
             } else {
                 // one child - promote child
-                ASTBinarySearchTreeNode<T> child = (null == foundNode.rightNode) ? foundNode.leftNode : foundNode.rightNode;
+                T child = (null == this.getNode(rightNodeIndex)) ? this.getNode(leftNodeIndex) : this.getNode(rightNodeIndex);
                 if (parentNode != null) {
-                    if (foundNode.data.compareTo(parentNode.leftNode.data) == 0) {
-                        parentNode.setLeftNode(child);
-                    } else if (foundNode.data.compareTo(parentNode.rightNode.data) == 0) {
-                        parentNode.setRightNode(child);
+                    int parentLeftNodeIndex = (2*parentNodeIndex)+1;
+                    int parentRightNodeIndex = (2*parentNodeIndex)+2;
+                    if (foundNode.value.compareTo(this.getNode(parentLeftNodeIndex)) == 0) {
+                        setNode(parentLeftNodeIndex, child);
+                    } else if (foundNode.value.compareTo(this.getNode(parentRightNodeIndex)) == 0) {
+                        setNode(parentRightNodeIndex, child);
                     }
                 } else {
-                    child.parentNode = null;
+                    //child.parentNode = null;
                     this.setRoot(child);
                 }
             }
             this.count--;
-
+/*
             if(null != treeToBalance) {
                 App.print("Tree to balance -> " + treeToBalance.getData());
                 treeToBalance.balance();
@@ -146,10 +191,11 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
                     this.rootNode.balance();
                 }
             }
+*/
         }
     }
 
-    public ASTBinarySearchTreeNode<T> searchObject(Object o) {
+    public Result<T> search(Object o) {
         T val = null;
         if (o instanceof Comparable) {
             val = (T) o;
@@ -161,36 +207,36 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
         }
     }
 
-    public ASTBinarySearchTreeNode<T> search(T value) {
-        return findNode(this.rootNode, new ASTBinarySearchTreeNode<T>(value, null, this));
+    public Result<T> search(T value) {
+        return findNode(0, value);
     }
 
-    private ASTBinarySearchTreeNode<T> findNode(ASTBinarySearchTreeNode<T> node,
-            ASTBinarySearchTreeNode<T> nodeToFind) {
+    private Result<T> findNode(int nodeIndex, T valueToFind) {
+        T node = this.getNode(nodeIndex);
+        App.print(MessageFormat.format("Node ({0}, {1}) -> ValueToFind ({2})", nodeIndex, node, valueToFind));
         if (node == null) {
             return null;
         } else {
-            //App.print(MessageFormat.format("Node ({0}) -> ValueToFind ({1})", node.data, nodeToFind.data));
-            if (node.data.compareTo(nodeToFind.data) == 0) {
-                //App.print(MessageFormat.format("Returning found node ({0})", node.data));
-                return node;
-            } else if (nodeToFind.data.compareTo(node.data) < 0) {
-                return findNode(node.leftNode, nodeToFind);
+            if (valueToFind.compareTo(node) == 0) {
+                return new Result<T>(nodeIndex, node);
+            } else if (valueToFind.compareTo(node) < 0) {
+                return findNode((2*nodeIndex)+1, valueToFind);
             } else {
-                return findNode(node.rightNode, nodeToFind);
+                return findNode((2*nodeIndex)+2, valueToFind);
             }
         }
     }
 
-    private void InPlaceTraversal(List<T> list, ASTBinarySearchTreeNode<T> node) {
-        if (null != node) {
-            // App.print(MessageFormat.format("Traversing {0}",
+    private void InPlaceTraversal(List<T> list, int nodeIndex) {
+        if (nodeIndex > -1 && nodeIndex < this.nodes.size()-1) {
+            // contactlist.App.print(MessageFormat.format("Traversing {0}",
             // node.data.toString()));
-            InPlaceTraversal(list, node.leftNode);
-            list.add(node.data);
-            // App.print(MessageFormat.format("Added {0} to list",
+            InPlaceTraversal(list, (2*nodeIndex)+1);
+            T node = this.getNode(nodeIndex);
+            if(null != node) list.add(node);
+            // contactlist.App.print(MessageFormat.format("Added {0} to list",
             // node.data.toString()));
-            InPlaceTraversal(list, node.rightNode);
+            InPlaceTraversal(list, (2*nodeIndex)+2);
         }
     }
 
@@ -233,8 +279,8 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
      *                              "{@docRoot}/java.base/java/util/Collection.html#optional-restrictions">optional</a>)
      */
     public boolean contains(Object o) {
-        ASTBinarySearchTreeNode<T> node = searchObject(o);
-        return null != node;
+        Result<T> node = search(o);
+        return null != node && null != node.value;
     }
 
     /**
@@ -247,8 +293,8 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
      */
     public Iterator<T> iterator() {
         List<T> sortedList = new ArrayList<>();
-        InPlaceTraversal(sortedList, this.rootNode);
-        // App.print(sortedList.size() + " items in list");
+        InPlaceTraversal(sortedList, 0);
+        // contactlist.App.print(sortedList.size() + " items in list");
         return sortedList.iterator();
     }
 
@@ -280,7 +326,7 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
      */
     public Object[] toArray() {
         List<T> list = new ArrayList<>();
-        InPlaceTraversal(list, this.rootNode);
+        InPlaceTraversal(list, 0);
         return list.toArray();
     }
 
@@ -352,7 +398,7 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
             a = (E[]) java.lang.reflect.Array
                     .newInstance(a.getClass().getComponentType(), count);
         List<T> list = new ArrayList<>();
-        InPlaceTraversal(list, this.rootNode);
+        InPlaceTraversal(list, 0);
         return list.toArray(a);
     }
 
@@ -625,11 +671,23 @@ public class ASTBinarySearchTree<T extends Comparable<T>> implements Collection<
 
     public String print() {
         StringBuffer sb = new StringBuffer();
-        sb.append(new TreePrettyPrinter<T>().traversePreOrder(this.rootNode));
-        if(null != this.rootNode) {
-            sb.append("\n\nLeft Height: "+this.rootNode.getLeftHeight());
-            sb.append("\tRight Height: "+this.rootNode.getRightHeight());
+        for(int i=0; i < this.nodes.size(); i++) {
+            T node = this.getNode(i);
+            if(null != node) {
+                sb.append(MessageFormat.format("({0},{1}), ", i, node));
+            }
         }
+        sb.append(MessageFormat.format("Array size:{0}, Count:{1}", this.nodes.size(), this.size()));
         return sb.toString();
+    }
+}
+
+class Result<T extends Comparable<T>> {
+    public int index = -1;
+    public T value;
+
+    public Result(int index, T val){
+        this.index = index;
+        this.value = val;
     }
 }

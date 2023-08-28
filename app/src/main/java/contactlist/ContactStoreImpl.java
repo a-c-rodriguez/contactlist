@@ -7,12 +7,14 @@ import java.util.stream.Collectors;
 import contactlist.dataStructures.ASTBinarySearchTree;
 import contactlist.dataStructures.BinarySearchTree;
 import contactlist.dataStructures.LinkedListImpl;
+import contactlist.dataStructures.ArrayASTBinarySearchTree;
 
 public class ContactStoreImpl implements IContactStore {
 
     //private LinkedListImpl<Contact> contacts = new LinkedListImpl<>();
     //private BinarySearchTree<Contact> contacts = new BinarySearchTree<>();
     private ASTBinarySearchTree<Contact> contacts = new ASTBinarySearchTree<>();
+    //private ArrayASTBinarySearchTree<Contact> contacts = new ArrayASTBinarySearchTree<>();
 
     public int getMaxId(){
         return contacts.size();
@@ -56,6 +58,7 @@ public class ContactStoreImpl implements IContactStore {
     public List<Contact> find(Contact findContact){
         return contacts.stream()
             .filter(contact -> {
+                if(null == contact) return false;
                 if(findContact.id > 0) {
                     //System.out.println(MessageFormat.format("contact.id {0} and findContact.id {1}", contact.id, findContact.id));
                     return contact.id == findContact.id;

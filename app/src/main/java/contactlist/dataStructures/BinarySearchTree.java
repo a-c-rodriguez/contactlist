@@ -89,12 +89,11 @@ public class BinarySearchTree<T extends Comparable<T>> implements Collection<T> 
             } else if(null != found.leftNode && null != found.rightNode) {
                 BinarySearchTreeNode<T> foundLeft = found.leftNode;
                 BinarySearchTreeNode<T> foundRight = found.rightNode;
-                BinarySearchTreeNode<T> leftMostChild = foundRight.leftNode;
+                BinarySearchTreeNode<T> leftMostChild = (null != foundRight.leftNode) ? foundRight.leftNode : foundRight;
                 while(null != leftMostChild.leftNode) {
                     leftMostChild = leftMostChild.leftNode;
                 }
                 BinarySearchTreeNode<T> temp = leftMostChild;
-                leftMostChild = leftMostChild.rightNode;
                 if(parentNode != null) {
                     if(parentNode.leftNode.data.compareTo(found.data) == 0){
                         parentNode.leftNode = temp;

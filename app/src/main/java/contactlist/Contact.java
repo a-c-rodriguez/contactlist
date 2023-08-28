@@ -58,12 +58,13 @@ public class Contact implements Comparable<Contact> {
 
     @Override
     public String toString() {
-        return MessageFormat.format("{0}|{1}|{2}|{3}|{4}|{5}", firstName, lastName, streetAddress, city, state, postalCode);
+        //return MessageFormat.format("{0}|{1}|{2}|{3}|{4}|{5}", firstName, lastName, streetAddress, city, state, postalCode);
+        return toStringWithId();
     }
 
     @Override
     public boolean equals(Object o) {
-        return this.toString().equalsIgnoreCase(o.toString());
+        return this.id == ((Contact)o).id;
     }
 
     @Override
@@ -73,6 +74,6 @@ public class Contact implements Comparable<Contact> {
 
     @Override
     public int compareTo(Contact contact) {
-        return this.toString().compareTo(contact.toString()); 
+        return new Integer(this.id).compareTo(contact.id); 
     }
 }

@@ -13,6 +13,7 @@ import contactlist.dataReaders.FileLoader;
 
 public class App {
     
+    private static final String UNKNOWN = "unknown";
     static IContactStore contactStore = new ContactStoreImpl();
     static String verbPattern = "^\\b?(\\w+)\\b?";
     static Pattern verbRegex = Pattern.compile(verbPattern);
@@ -27,7 +28,7 @@ public class App {
             if (nextLine.trim().equalsIgnoreCase("exit"))
                 break;
             Matcher verbMatch = verbRegex.matcher(nextLine);
-            String verb = "unknown";
+            String verb = UNKNOWN;
             while(verbMatch.find()){
                 verb = verbMatch.group(1);
             }
